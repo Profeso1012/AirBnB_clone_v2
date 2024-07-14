@@ -7,6 +7,7 @@ env.hosts = ["100.25.165.20", "52.91.133.191"]
 env.user = 'ubuntu'
 env.key_filename = '~/.ssh/id_rsa'
 
+
 def do_deploy(archive_path):
     """Distributes an archive to a web server.
     Args:
@@ -23,7 +24,6 @@ def do_deploy(archive_path):
         file_name = archive_path.split("/")[-1]
         no_ext = file_name.split(".")[0]
         release_dir = "/data/web_static/releases/{}".format(no_ext)
-        
         print("Uploading archive to /tmp/...")
         put(archive_path, "/tmp/{}".format(file_name))
 
