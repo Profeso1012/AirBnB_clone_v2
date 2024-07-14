@@ -1,12 +1,32 @@
 #!/usr/bin/python3
-# Fabfile to create and distribute an archive to web servers.
-from fabric.api import env, local, put, run
-from datetime import datetime
-import os.path
+# Fabfile to delete out-of-date archives.
+from fabric.api import env, run, local
 
 env.hosts = ["100.25.165.20", "52.91.133.191"]  # Replace with your actual IPs
 env.user = 'ubuntu'
 env.key_filename = '~/.ssh/id_rsa'  # Replace with your actual key path
+
+
+def do_clean(number=0):
+    """Delete out-of-date archives.
+
+    Args:
+        number (int): The number of archives to keep.
+    """
+    number = int(number)
+    if number == 0:
+        number = 1
+    # Local cleanup
+    local_archives = sorted(local("ls -tr versions", capture=True).split())
+    archives_to_delete = local_archives[:-number]
+    for archive in archives_to_delete:
+        local("rm -f versions/{}".format(archive))
+    # Remote cleanup
+    remote_archives = sorted(run("ls -tr /data/web_static/releases").split())
+    archives_to_delete = [a for a in remote_archives if
+                          "web_static_" in a][:-number]
+    for archive in archives_to_delete:
+        run("rm -rf /data/web_static/releases/{}".format(archive))
 
 
 def do_pack():
